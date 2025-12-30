@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orçamentos Gesso & Drywall</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary-color: #0d6efd; 
+      --secondary-color: #f0f2f5;
+    }
+
+    body {
+      background-color: var(--secondary-color);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Header */
+    .hero-header {
+      background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+      border-radius: 0 0 20px 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    /* Card do Formulário */
+    .form-card {
+      background: white;
+      border-radius: 15px;
+      border: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      padding: 30px;
+      margin-bottom: 50px;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #444;
+    }
+
+    .btn-submit {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: transform 0.2s;
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      background-color: #0b5ed7;
+      color: white;
+    }
+
+    /* Área do Trabalhador */
+    .worker-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      opacity: 0.8;
+    }
+    .worker-btn:hover {
+      opacity: 1;
+    }
+
+  </style>
+</head>
+<body>
+
+  <button class="btn btn-dark btn-sm worker-btn rounded-pill" onclick="verFilaTrabalho()">
+    <i class="fas fa-hard-hat"></i> Área do Gesseiro
+  </button>
+
+  <div class="hero-header">
+    <h1><i class="fas fa-hammer"></i> Gesso & Drywall</h1>
+    <p class="lead">Descreva o que você precisa e receba um orçamento.</p>
+  </div>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        
+        <div class="form-card">
+          <h4 class="text-center mb-4 text-primary"><i class="fas fa-clipboard-list"></i> Solicitar Orçamento</h4>
+          
+          <form id="orderForm">
+            <div class="mb-3">
+              <label class="form-label">Seu Nome</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                <input type="text" id="clientName" class="form-control" placeholder="Ex: João da Silva">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">WhatsApp / Celular</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fab fa-whatsapp"></i></span>
+                <input type="tel" id="clientPhone" class="form-control" placeholder="(DD) 99999-9999">
+              </div>
+              <small class="text-muted">Entraremos em contato por este número.</small>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Endereço da Obra</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                <input type="text" id="clientAddress" class="form-control" placeholder="Rua, Bairro e Cidade">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Prazo Desejado</label>
+              <input type="text" id="clientDeadline" class="form-control" placeholder="Ex: Preciso para semana que vem">
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">O que você precisa fazer?</label>
+              <textarea id="clientDesc" class="form-control" rows="5" placeholder="Ex: Gostaria de rebaixar o teto da sala com sanca aberta e iluminação, e fazer uma parede 3D no quarto..."></textarea>
+            </div>
+
+            <button type="button" class="btn btn-submit w-100 rounded-pill" onclick="enviarSolicitacao()">
+              🚀 Enviar Solicitação
+            </button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="workQueueModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title">👷 Lista de Serviços Solicitados</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body bg-light">
+            <div class="alert alert-info">
+                <small><i class="fas fa-clock"></i> Os pedidos somem da lista após 24 horas.</small>
+            </div>
+            <div id="queue-container">Carregando...</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="atualizarFilaManual()">🔄 Atualizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import { getDatabase, ref, push, get, remove } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGg6A_HNAJ0qsB4gzYJgQK9E3ztISO-FM",
+      authDomain: "cardapio-1d6f1.firebaseapp.com",
+      projectId: "cardapio-1d6f1",
+      storageBucket: "cardapio-1d6f1.firebasestorage.app",
+      messagingSenderId: "841755407374",
+      appId: "1:841755407374:web:115d312d354bb6e77df85f",
+      measurementId: "G-CYH903V9W1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // --- ENVIAR SOLICITAÇÃO ---
+
+    window.enviarSolicitacao = function() {
+        const nome = document.getElementById('clientName').value;
+        const telefone = document.getElementById('clientPhone').value;
+        const endereco = document.getElementById('clientAddress').value;
+        const prazo = document.getElementById('clientDeadline').value;
+        const descricao = document.getElementById('clientDesc').value;
+
+        // Validação Simples
+        if (!nome || !telefone || !descricao) {
+            alert("Por favor, preencha pelo menos o Nome, Telefone e a Descrição do serviço.");
+            return;
+        }
+
+        const novaSolicitacao = {
+            cliente: nome,
+            telefone: telefone,
+            endereco: endereco || "Não informado",
+            prazo: prazo || "A combinar",
+            descricao: descricao,
+            timestamp: Date.now()
+        };
+
+        push(ref(database, 'servicos_gesso'), novaSolicitacao)
+        .then(() => {
+            alert("✅ Solicitação enviada com sucesso! Logo entraremos em contato pelo WhatsApp.");
+            document.getElementById('orderForm').reset();
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Erro ao enviar: " + err.message);
+        });
+    }
+
+    // --- ÁREA DO TRABALHADOR ---
+
+    window.verFilaTrabalho = function() {
+        const modal = new bootstrap.Modal(document.getElementById('workQueueModal'));
+        modal.show();
+        atualizarFilaManual();
+    }
+
+    window.atualizarFilaManual = function() {
+        const container = document.getElementById('queue-container');
+        container.innerHTML = '<div class="text-center p-3"><div class="spinner-border text-primary"></div></div>';
+
+        const dbRef = ref(database, 'servicos_gesso');
+
+        get(dbRef).then((snapshot) => {
+            container.innerHTML = '';
+            
+            if (!snapshot.exists()) {
+                container.innerHTML = '<div class="text-center text-muted p-4">Nenhum serviço pendente no momento.</div>';
+                return;
+            }
+
+            // Define tempo de expiração para 24 HORAS
+            const TEMPO_EXPIRACAO = 24 * 60 * 60 * 1000; 
+            const agora = Date.now();
+
+            snapshot.forEach((child) => {
+                const key = child.key;
+                const dados = child.val();
+
+                // Auto-delete se for muito velho
+                if (dados.timestamp && (agora - dados.timestamp > TEMPO_EXPIRACAO)) {
+                    remove(ref(database, `servicos_gesso/${key}`));
+                    return;
+                }
+
+                const hora = new Date(dados.timestamp).toLocaleString();
+                
+                // Formatar link do WhatsApp (remove caracteres não numéricos)
+                const zapLink = `https://wa.me/55${dados.telefone.replace(/\D/g, '')}`;
+
+                container.innerHTML += `
+                    <div class="card mb-3 shadow-sm" style="border-left: 5px solid var(--primary-color);">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <h5 class="card-title fw-bold text-primary">${dados.cliente}</h5>
+                                <small class="text-muted">${hora}</small>
+                            </div>
+                            
+                            <p class="mb-1"><strong><i class="fas fa-map-marker-alt"></i> Onde:</strong> ${dados.endereco}</p>
+                            <p class="mb-1"><strong><i class="fas fa-calendar-alt"></i> Prazo:</strong> ${dados.prazo}</p>
+                            <div class="alert alert-secondary mt-2">
+                                <strong>Pedido:</strong><br>
+                                ${dados.descricao}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
+                                <a href="${zapLink}" target="_blank" class="btn btn-success btn-sm flex-grow-1">
+                                    <i class="fab fa-whatsapp"></i> Chamar no WhatsApp
+                                </a>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="concluirServico('${key}')">
+                                    <i class="fas fa-trash"></i> Apagar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+    }
+
+    window.concluirServico = function(key) {
+        if(confirm("Tem certeza que deseja apagar este pedido da lista?")) {
+            remove(ref(database, `servicos_gesso/${key}`))
+            .then(() => atualizarFilaManual());
+        }
+    }
+
+  </script>
+</body>
+</html>
